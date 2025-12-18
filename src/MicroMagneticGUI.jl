@@ -2,26 +2,36 @@
 module MicroMagneticGUI
 
 using Bonito
-# Create a reactive counter app
-app = App() do session
-    count = Observable(0)
-    button = Button("Click me!")
-    on(click-> (count[] += 1), button)
-    return DOM.div(button, DOM.h1("Count: ", count))
+using Observables
+using MicroMagnetic
+
+# Import submodules
+include("core.jl")
+include("ui_components.jl")
+include("presets.jl")
+include("utils.jl")
+include("interface.jl")
+
+function launch_interface(port::Int=1234)
+    println("Starting MicroMagnetic.jl Interface...")
+    println("Server will be available at http://localhost:$port")
+    println("Press Ctrl+C to stop the server")
+    
+    # Create the interface
+    app = create_interface()
+    
+    try
+        # Start the server
+        server = Bonito.Server(app, "127.0.0.1", port)
+        #Bonito.run(server)
+    catch e
+        if !(e isa InterruptException)
+            rethrow(e)
+        end
+        println("\nServer stopped by user")
+    end
 end
 
-
-function run()
-
-    #display(app) # display it in browser or plotpane
-
-    # Or serve it on a server
-    server = Server(app, "127.0.0.1", 8888)
-
-end
-
-export run
-
-function __init__() end
+export create_interface, launch_interface
 
 end #module

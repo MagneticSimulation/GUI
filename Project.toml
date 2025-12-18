@@ -6,3 +6,4 @@ version = "0.1.0"
 [deps]
 MicroMagnetic = "cef16ca0-16a8-11ef-389e-9fbcf1974e83"
 Bonito = "824d6782-a2ef-11e9-3a09-e5662e0c26f8"
+Observables = "510215fc-4207-5dde-b226-833fc4488ee2"
