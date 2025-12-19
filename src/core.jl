@@ -38,6 +38,7 @@ Create simulation object
 function create_sim(state::SimulationState)
     try
         state.status[] = "Creating simulation..."
+        println(state.status[])
         notify(state.status)
         
         # Create mesh

@@ -1,33 +1,29 @@
 # interface/ui_components.jl
 
 function param_input(label::String, obs::Observable, key::String, options=Dict())
-    default_options = Dict(
-        :type => "number",
-        :step => "any",
-        :style => "width: 120px; margin-left: 10px;"
-    )
-    merged_options = merge(default_options, options)
     
-    # 构建所有属性的字典
-    input_attrs = Dict(
-        :value => string(obs[][key]),
-        :oninput => js"""function(e) {
-            const value = parseFloat(e.target.value);
-            if(!isNaN(value)) {
-                const current = $obs[];
-                current[$key] = value;
-                Bonito.@set($obs = current);
-            }
-        }"""
+    current_value = obs[][key]
+    
+    numberinput = NumberInput(current_value*1.0; 
+        style=Styles(
+            CSS("width" => "120px"),
+            CSS("margin-left" => "10px"),
+            CSS("font-weight" => "500"),
+            CSS(":hover", "background-color" => "silver"),
+            CSS(":focus", "box-shadow" => "rgba(0, 0, 0, 0.5) 0px 0px 5px"),
+        )
     )
     
-    # 合并选项
-    all_attrs = merge(input_attrs, merged_options)
+    on(numberinput.value) do value::Float64
+        current = obs[]
+        current[key] = value
+        obs[] = current
+    end
     
     return DOM.div(
         style="margin: 8px 0;",
         DOM.span(label, style="display: inline-block; width: 150px;"),
-        DOM.input(; all_attrs...)
+        numberinput
     )
 end
 
@@ -35,27 +31,38 @@ end
 Button component
 """
 function button(label::String, onclick::Function, color="#3498db", disabled=Observable(false))
-    # Create a simple button without passing Julia function to JavaScript
-    return DOM.button(
-        label,
-        disabled=disabled,
-        style="""
-            background-color: $color;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px;
-            font-size: 14px;
-        """
+    # Create Button component with proper event handling
+    style = Styles(
+        Bonito.CSS("background-color" => color),
+        Bonito.CSS("color" => "white"),
+        Bonito.CSS("border" => "none"),
+        Bonito.CSS("padding" => "8px 16px"),
+        Bonito.CSS("border-radius" => "4px"),
+        Bonito.CSS("cursor" => "pointer"),
+        Bonito.CSS("margin" => "5px"),
+        Bonito.CSS("font-size" => "14px"),
+        Bonito.CSS(":disabled", "opacity" => "0.6"),
+        Bonito.CSS(":disabled", "cursor" => "not-allowed")
     )
+
+    btn = Bonito.Button(label; disabled=disabled, style=style)
+    
+    # Add click event listener
+    on(btn.value) do clicked
+        @info("hahahah")
+        if clicked && !disabled[]
+            onclick()
+        end
+    end
+
+    return btn
 end
 
 """
 Create parameter panel
 """
 function create_parameter_panel(state::SimulationState)
+
     return DOM.div(
         style="flex: 1;",
         
@@ -96,6 +103,8 @@ function create_parameter_panel(state::SimulationState)
             """
         ),
         
+
+
         # Control buttons
         DOM.div(
             DOM.h3("Simulation Control", style="color: #2ecc71; margin-bottom: 10px;"),

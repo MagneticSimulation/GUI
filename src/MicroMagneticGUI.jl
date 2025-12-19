@@ -21,9 +21,12 @@ function launch_interface(port::Int=1234)
     app = create_interface()
     
     try
-        # Start the server
+        # Start the server - Bonito.Server automatically starts the server
         server = Bonito.Server(app, "127.0.0.1", port)
-        #Bonito.run(server)
+        
+        # Wait indefinitely to keep the server running
+        #wait(server)
+        
     catch e
         if !(e isa InterruptException)
             rethrow(e)
